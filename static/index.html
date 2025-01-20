@@ -3,48 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audio Recorder</title>
+    <title>VoiceGPT - Audio Recorder</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background-color: #f8f9fa;
-            padding-top: 30px;
+            background-color: #f1f8ff;
+            font-family: 'Arial', sans-serif;
         }
         .container {
-            max-width: 600px;
+            max-width: 700px;
             margin: 0 auto;
+            padding-top: 50px;
+        }
+        h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #4c6ef5;
+        }
+        .btn-lg {
+            font-size: 1.2rem;
+            padding: 10px 20px;
+            margin: 10px;
+        }
+        .btn-primary {
+            background-color: #4c6ef5;
+            border-color: #4c6ef5;
+        }
+        .btn-primary:hover {
+            background-color: #3b56c9;
+            border-color: #3b56c9;
+        }
+        .btn-danger {
+            background-color: #e63946;
+            border-color: #e63946;
+        }
+        .btn-danger:hover {
+            background-color: #d12734;
+            border-color: #d12734;
+        }
+        .btn-secondary {
+            background-color: #c1c1c1;
+            border-color: #c1c1c1;
+        }
+        .btn-secondary:hover {
+            background-color: #a8a8a8;
+            border-color: #a8a8a8;
         }
         #audio-preview {
             width: 100%;
             margin-top: 20px;
+            border-radius: 10px;
         }
         #output h2 {
             margin-top: 20px;
             color: #333;
+            font-size: 1.5rem;
         }
         #output p {
             font-size: 16px;
             color: #555;
+            word-wrap: break-word;
+        }
+        .card {
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .card-header {
+            font-size: 1.8rem;
+            color: #333;
+            font-weight: bold;
+            text-align: center;
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #ddd;
+        }
+        .card-body {
+            padding: 20px;
         }
     </style>
 </head>
 <body>
-    <div class="container text-center">
-        <h1 class="mb-4">Record Audio</h1>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">VoiceGPT - Audio Recorder</div>
+            <div class="card-body text-center">
+                <h1 class="mb-4">Record Your Voice</h1>
 
-        <button id="record-btn" class="btn btn-primary btn-lg">Start Recording</button>
-        <button id="stop-btn" class="btn btn-danger btn-lg" disabled>Stop Recording</button>
-        <button id="reset-btn" class="btn btn-secondary btn-lg" disabled>Reset</button>
+                <button id="record-btn" class="btn btn-primary btn-lg">Start Recording</button>
+                <button id="stop-btn" class="btn btn-danger btn-lg" disabled>Stop Recording</button>
+                <button id="reset-btn" class="btn btn-secondary btn-lg" disabled>Reset</button>
 
-        <br>
-        <audio id="audio-preview" controls></audio>
+                <br>
+                <audio id="audio-preview" controls></audio>
 
-        <div id="output">
-            <h2>Recognized Text:</h2>
-            <p id="recognized-text" class="text-muted">No text recognized yet.</p>
-            <h2>Generated Response:</h2>
-            <p id="generated-response" class="text-muted">No response generated yet.</p>
+                <div id="output" class="mt-4">
+                    <h2>Recognized Text:</h2>
+                    <p id="recognized-text" class="text-muted">No text recognized yet.</p>
+                    <h2>Generated Response:</h2>
+                    <p id="generated-response" class="text-muted">No response generated yet.</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -77,7 +137,7 @@
                 formData.append("file", audioBlob, "audio.wav");
 
                 try {
-                    const response = await fetch("http://127.0.0.1:8000/process-audio", {
+                    const response = await fetch("http://13.233.105.99:8000/process-audio", {
                         method: "POST",
                         body: formData,
                     });
