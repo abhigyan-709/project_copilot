@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Recorder</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 30px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        #audio-preview {
+            width: 100%;
+            margin-top: 20px;
+        }
+        #output h2 {
+            margin-top: 20px;
+            color: #333;
+        }
+        #output p {
+            font-size: 16px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container text-center">
+        <h1 class="mb-4">Record Audio</h1>
+
+        <button id="record-btn" class="btn btn-primary btn-lg">Start Recording</button>
+        <button id="stop-btn" class="btn btn-danger btn-lg" disabled>Stop Recording</button>
+        <button id="reset-btn" class="btn btn-secondary btn-lg" disabled>Reset</button>
+
+        <br>
+        <audio id="audio-preview" controls></audio>
+
+        <div id="output">
+            <h2>Recognized Text:</h2>
+            <p id="recognized-text" class="text-muted">No text recognized yet.</p>
+            <h2>Generated Response:</h2>
+            <p id="generated-response" class="text-muted">No response generated yet.</p>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and Popper.js (optional for certain Bootstrap features) -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+
+    <script>
+        const recordBtn = document.getElementById("record-btn");
+        const stopBtn = document.getElementById("stop-btn");
+        const resetBtn = document.getElementById("reset-btn");
+        const audioPreview = document.getElementById("audio-preview");
+        const recognizedText = document.getElementById("recognized-text");
+        const generatedResponse = document.getElementById("generated-response");
+
+        let mediaRecorder;
+        let audioChunks = [];
+
+        recordBtn.addEventListener("click", async () => {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+
+            mediaRecorder.ondataavailable = (event) => {
+                audioChunks.push(event.data);
+            };
+
+            mediaRecorder.onstop = async () => {
+                const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
+                const formData = new FormData();
+                formData.append("file", audioBlob, "audio.wav");
+
+                try {
+                    const response = await fetch("http://127.0.0.1:8000/process-audio", {
+                        method: "POST",
+                        body: formData,
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        console.log("Recognized Text:", result.recognized_text);
+                        console.log("Generated Response:", result.generated_response);
+
+                        // Display the results
+                        recognizedText.textContent = result.recognized_text;
+                        generatedResponse.textContent = result.generated_response;
+                    } else {
+                        console.error("Error:", await response.text());
+                    }
+                } catch (error) {
+                    console.error("Error sending audio:", error);
+                }
+            };
+
+            mediaRecorder.start();
+            recordBtn.disabled = true;
+            stopBtn.disabled = false;
+        });
+
+        stopBtn.addEventListener("click", () => {
+            mediaRecorder.stop();
+            recordBtn.disabled = false;
+            stopBtn.disabled = true;
+            resetBtn.disabled = false; // Enable the reset button after stopping the recording
+        });
+
+        resetBtn.addEventListener("click", () => {
+            // Reset the interface and data
+            recordBtn.disabled = false;
+            stopBtn.disabled = true;
+            resetBtn.disabled = true;
+
+            audioPreview.src = ""; // Clear the audio preview
+            audioChunks = []; // Clear the audio chunks
+            recognizedText.textContent = "No text recognized yet."; // Reset recognized text
+            generatedResponse.textContent = "No response generated yet."; // Reset generated response
+        });
+    </script>
+</body>
+</html>

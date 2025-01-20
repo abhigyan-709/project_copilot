@@ -13,6 +13,8 @@ client = genai.Client(api_key=api_key)
 
 r = sr.Recognizer()
 with sr.Microphone() as source:
+    print("Calibrating...")
+    r.adjust_for_ambient_noise(source)
     print("Hey! What do you want to know?")
     audio = r.listen(source)
 
