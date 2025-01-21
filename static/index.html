@@ -137,7 +137,7 @@
                 formData.append("file", audioBlob, "audio.wav");
 
                 try {
-                    const response = await fetch("http://13.233.105.99:8000/process-audio", {
+                    const response = await fetch("http://127.0.0.1:8000/process-audio", {
                         method: "POST",
                         body: formData,
                     });
